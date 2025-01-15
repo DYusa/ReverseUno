@@ -20,17 +20,17 @@ class Program
         Console.WriteLine($"Starting card: {currentCard}\n");
 
         bool player1Turn = true;
-        while (deck.Count > 0)
+        while (deck.Count > 0 || player1Hand.Count > 0 || player2Hand.Count > 0)
         {
             if (player1Turn)
             {
                 Console.WriteLine("Player 1's turn:");
-                PlayTurn(player1Hand, player2Hand, ref currentCard, deck);
+                PlayTurnInteractive(player1Hand, player2Hand, ref currentCard, deck);
             }
             else
             {
                 Console.WriteLine("Player 2's turn:");
-                PlayTurn(player2Hand, player1Hand, ref currentCard, deck);
+                PlayTurnInteractive(player2Hand, player1Hand, ref currentCard, deck);
             }
             player1Turn = !player1Turn;
         }
@@ -84,46 +84,65 @@ class Program
         return hand;
     }
 
-    static void PlayTurn(List<string> currentPlayerHand, List<string> otherPlayerHand, ref string currentCard, List<string> deck)
+    static void PlayTurnInteractive(List<string> currentPlayerHand, List<string> otherPlayerHand, ref string currentCard, List<string> deck)
     {
         Console.WriteLine($"Current card: {currentCard}");
         Console.WriteLine("Your hand: " + string.Join(", ", currentPlayerHand));
 
-        // Attempt to play a card
+        // Check for playable cards
+        List<int> playableIndices = new List<int>();
         for (int i = 0; i < currentPlayerHand.Count; i++)
         {
             string card = currentPlayerHand[i];
             if (card.Split(' ')[0] == currentCard.Split(' ')[0] ||
                 card.Split(' ')[1] == currentCard.Split(' ')[1])
             {
-                currentCard = card;
-                currentPlayerHand.RemoveAt(i);
-                Console.WriteLine($"Played {card}\n");
-                return;
+                playableIndices.Add(i);
             }
         }
 
-        // If no playable card
-        if (currentPlayerHand.Count > 0)
+        if (playableIndices.Count > 0)
         {
-            string givenCard = currentPlayerHand[0];
-            currentPlayerHand.RemoveAt(0);
-            otherPlayerHand.Add(givenCard);
-            Console.WriteLine($"No playable card. Gave {givenCard} to the other player.");
-
-            // Other player plays any card of their choice
-            if (otherPlayerHand.Count > 0)
+            Console.WriteLine("Playable cards:");
+            foreach (int index in playableIndices)
             {
-                Console.WriteLine("Other player gets to play any card of their choice.");
-                string chosenCard = otherPlayerHand[0];
-                otherPlayerHand.RemoveAt(0);
-                currentCard = chosenCard;
-                Console.WriteLine($"Other player played {chosenCard}.");
+                Console.WriteLine($"{index + 1}: {currentPlayerHand[index]}");
+            }
 
-                // Other player draws 2 more cards
-                List<string> extraCards = DrawCards(deck, 2);
-                otherPlayerHand.AddRange(extraCards);
-                Console.WriteLine($"Other player drew 2 more cards: {string.Join(", ", extraCards)}\n");
+            Console.Write("Choose a card to play (enter the number): ");
+            int choice;
+            while (!int.TryParse(Console.ReadLine(), out choice) || choice < 1 || choice > currentPlayerHand.Count || !playableIndices.Contains(choice - 1))
+            {
+                Console.Write("Invalid choice. Please choose a valid card: ");
+            }
+
+            currentCard = currentPlayerHand[choice - 1];
+            currentPlayerHand.RemoveAt(choice - 1);
+            Console.WriteLine($"Played {currentCard}\n");
+        }
+        else
+        {
+            if (currentPlayerHand.Count > 0)
+            {
+                string givenCard = currentPlayerHand[0];
+                currentPlayerHand.RemoveAt(0);
+                otherPlayerHand.Add(givenCard);
+                Console.WriteLine($"No playable card. Gave {givenCard} to the other player.");
+
+                // Other player plays any card of their choice
+                if (otherPlayerHand.Count > 0)
+                {
+                    Console.WriteLine("Other player gets to play any card of their choice.");
+                    string chosenCard = otherPlayerHand[0];
+                    otherPlayerHand.RemoveAt(0);
+                    currentCard = chosenCard;
+                    Console.WriteLine($"Other player played {chosenCard}.");
+
+                    // Other player draws 2 more cards
+                    List<string> extraCards = DrawCards(deck, 2);
+                    otherPlayerHand.AddRange(extraCards);
+                    Console.WriteLine($"Other player drew 2 more cards: {string.Join(", ", extraCards)}\n");
+                }
             }
         }
     }
