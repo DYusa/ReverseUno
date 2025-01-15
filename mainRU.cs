@@ -111,17 +111,20 @@ class Program
             otherPlayerHand.Add(givenCard);
             Console.WriteLine($"No playable card. Gave {givenCard} to the other player.");
 
-            // Other player plays any card
-            Console.WriteLine("Other player gets to play any card of their choice.");
-            string chosenCard = otherPlayerHand[0];
-            otherPlayerHand.RemoveAt(0);
-            currentCard = chosenCard;
-            Console.WriteLine($"Other player played {chosenCard}.");
+            // Other player plays any card of their choice
+            if (otherPlayerHand.Count > 0)
+            {
+                Console.WriteLine("Other player gets to play any card of their choice.");
+                string chosenCard = otherPlayerHand[0];
+                otherPlayerHand.RemoveAt(0);
+                currentCard = chosenCard;
+                Console.WriteLine($"Other player played {chosenCard}.");
 
-            // Other player draws 2 more cards
-            List<string> extraCards = DrawCards(deck, 2);
-            otherPlayerHand.AddRange(extraCards);
-            Console.WriteLine($"Other player drew 2 more cards: {string.Join(", ", extraCards)}\n");
+                // Other player draws 2 more cards
+                List<string> extraCards = DrawCards(deck, 2);
+                otherPlayerHand.AddRange(extraCards);
+                Console.WriteLine($"Other player drew 2 more cards: {string.Join(", ", extraCards)}\n");
+            }
         }
     }
 }
